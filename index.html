@@ -30,7 +30,66 @@ box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans)}
 .top{background:var(--forest);color:var(--on-forest);padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px}
-.top .in-top{max-width:1040px;margin:0 auto;display:flex;justify-content:flex-end}
+.top .in-top{max-width:1040px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.tshare{display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--on-forest);border:1px solid rgba(244,247,242,.45);border-radius:99px;padding:7px 14px 7px 11px;font:700 14px var(--round);cursor:pointer}
+.tshare:hover{background:rgba(255,255,255,.1)}
+.tshare svg{width:18px;height:18px}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(10,20,14,.55);overflow:auto;-webkit-overflow-scrolling:touch;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(24px + env(safe-area-inset-bottom,0px))}
+.sheet[hidden]{display:none}
+.sbar{max-width:780px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.sbar .btn{background:var(--panel)}
+.sbar .btn.pri{background:var(--forest);color:var(--on-forest)}
+.doc{max-width:780px;margin:0 auto;background:#fff;color:#17231b;border-radius:10px;overflow:hidden;font:14px/1.45 var(--sans);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.doc .dh{background:#22372B;color:#f4f7f2;padding:14px 22px;display:flex;justify-content:flex-end}
+.doc .dh .mark{font-size:24px}
+.doc .db{padding:20px 22px 24px}
+.doc .dt{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.doc .dt svg{height:64px;width:auto;flex:none}
+.doc h3{margin:0;font:700 22px/1.2 var(--sans)}
+.doc .ds{margin:2px 0 0;color:#5a6b60;font:600 14px var(--round)}
+.doc .who{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1.5px solid #22372B;border-bottom:1px solid #d7ddd5;padding:8px 0;margin-bottom:14px}
+.doc .who div{font:600 12px var(--round);color:#5a6b60}
+.doc .who b{display:block;font:700 14px var(--sans);color:#17231b}
+.doc table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.doc th,.doc td{padding:6px 8px;border-top:1px solid #d7ddd5;text-align:right;font-size:13.5px}
+.doc th:first-child,.doc td:first-child{text-align:left}
+.doc thead th{border-top:0;border-bottom:1.5px solid #22372B;font-size:12px}
+.doc tr.dl td{font-weight:700}
+.doc tr.dl.l-choc td{background:#fcedf6}.doc tr.dl.l-gum td{background:#efedfb}.doc tr.dl.l-ros td{background:#fbe5e0}.doc tr.dl.l-chew td{background:#f2f9e4}.doc tr.dl.l-pre td{background:#e6f0f8}
+.doc tr.df td:first-child{padding-left:20px;color:#5a6b60}
+.doc .fn{color:#5a6b60;font:600 11.5px var(--round)}
+.doc .tot{margin:14px 0 0 auto;max-width:330px}
+.doc .tot div{display:flex;justify-content:space-between;padding:4px 0;font-size:14px}
+.doc .tot .nt{background:#22372B;color:#f4f7f2;border-radius:6px;padding:8px 12px;margin:6px 0;font-weight:700;font-size:18px}
+.doc .proj{margin-top:16px;border-top:1px solid #d7ddd5;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.doc .proj div{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.doc .proj span{font:600 13px var(--round);color:#5a6b60}
+.doc .dwhy{margin-top:14px;border-top:1px solid #d7ddd5;padding-top:10px}
+.doc .dwhy p{margin:4px 0;font:500 13px/1.45 var(--round)}
+.doc .dwhy b{font:700 13px var(--sans)}
+.doc .foot{margin-top:16px;color:#5a6b60;font:500 11.5px/1.5 var(--round)}
+@media(max-width:560px){.doc .who{grid-template-columns:1fr 1fr}.doc .proj{grid-template-columns:1fr}.doc .db{padding:16px 14px 20px}.doc th:nth-child(3),.doc td:nth-child(3){display:none}}
+@media print{
+ @page{margin:9mm 10mm}
+ body{background:#fff}
+ body>*:not(#sheet){display:none!important}
+ .sheet{position:static;background:none;padding:0;overflow:visible}
+ .sbar{display:none}
+ .doc{box-shadow:none;border-radius:0;max-width:none}
+ .doc,.doc *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .doc tr{break-inside:avoid}
+ .doc th:nth-child(3),.doc td:nth-child(3){display:table-cell}
+ .doc th,.doc td{padding:2px 8px;font-size:11px}
+ .doc .db{padding:10px 16px 4px}
+ .doc .dh{padding:8px 16px}.doc .dh .mark{font-size:20px}
+ .doc .dt svg{height:44px}
+ .doc .dt{margin-bottom:8px}.doc h3{font-size:19px}
+ .doc .who{margin-bottom:8px}
+ .doc .tot{margin-top:8px}.doc .tot div{padding:2px 0;font-size:12.5px}.doc .tot .nt{font-size:15px;padding:6px 10px}
+ .doc .proj{margin-top:10px}.doc .proj div{font-size:12px}
+ .doc .tot,.doc .proj{break-inside:avoid}
+ .doc .dwhy{margin-top:8px;padding-top:6px}.doc .dwhy p{margin:1px 0;font-size:11px}.doc .foot{margin-top:8px;font-size:10px}
+}
 .mark{font-family:var(--serif);font-weight:600;font-size:30px;letter-spacing:.2px;line-height:1}
 .mark sup{font-size:9px;vertical-align:top;margin-left:1px}
 h1,h2{margin:0}
@@ -135,7 +194,7 @@ details.line[open]>summary .chev{transform:rotate(90deg)}
 </style>
 </head>
 <body>
-<div class="top"><div class="in-top"><span class="mark" aria-label="Little Tree">Little Tree<sup>™</sup></span></div></div>
+<div class="top"><div class="in-top"><button class="tshare" id="tshare" aria-label="Share a buyer sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Share</button><span class="mark" aria-label="Little Tree">Little Tree<sup>™</sup></span></div></div>
 <div class="wrap">
 <header>
   <div class="brand"><svg class="ah" xmlns="http://www.w3.org/2000/svg" viewBox="724.5 237.0 186.5 274.0" role="img" aria-label="Little Tree arrowhead logo">
@@ -537,7 +596,6 @@ details.line[open]>summary .chev{transform:rotate(90deg)}
     </div>
     <div class="acts">
       <button class="btn pri" id="save">Save order</button>
-      <button class="btn" id="share">Share summary</button>
       <div class="sav"><select id="saved" aria-label="Saved orders"><option value="">Saved orders</option></select><button class="btn" id="del" aria-label="Delete saved order">Delete</button></div>
     </div>
     <p class="msg" id="msg" aria-live="polite"></p>
@@ -586,6 +644,10 @@ details.line[open]>summary .chev{transform:rotate(90deg)}
     </section>
   </div>
 </div>
+</div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Buyer sheet">
+  <div class="sbar"><button class="btn pri" id="sprint">Print or save PDF</button><button class="btn" id="stext">Send as text</button><button class="btn" id="sclose">Close</button></div>
+  <article class="doc" id="doc"></article>
 </div>
 <div class="mbar" aria-hidden="true"><span id="mlab">Net total</span><strong id="mnet">$0.00</strong></div>
 
@@ -649,9 +711,9 @@ function paint(){
     const lst=c*l.cost,nt=r2(lst*(1-rate));
     list+=lst;net+=nt;
     const lo=Math.min(l.lo,l.hi),hi=Math.max(l.lo,l.hi),uc=l.cost/l.bx;
-    let fr='';const fl=[];
+    let fr='';const fl=[],fx=[];
     l.f.forEach((f,i)=>{
-      const b=q[l.id][i];if(!b)return;fl.push(f+' '+b);
+      const b=q[l.id][i];if(!b)return;fl.push(f+' '+b);fx.push({f,b,u:b*l.bx,lst:b*l.cost});
       const u=b*l.bx;inv+=u*l.shelf;
       rlo+=lo*l.shelf;rhi+=hi*l.shelf;glo+=lo*(l.shelf-uc);ghi+=hi*(l.shelf-uc);
       let dos='–';
@@ -663,7 +725,7 @@ function paint(){
       }
       fr+=`<tr class="fr"><td>${f}<span class="dm internal">${dos}</span></td><td>${b}</td><td>${u}</td><td>${$$(b*l.cost)}</td><td></td><td class="internal">${dos}</td></tr>`;
     });
-    SL.push({name:l.name,c,fl,nt,rate});
+    SL.push({id:l.id,name:l.name,c,u:c*l.bx,lst,fl,fx,nt,rate});
     rows+=`<tr class="lr l-${l.id}"><td>${l.name}</td><td>${c}</td><td>${c*l.bx}</td><td>${$$(lst)}</td><td>${$$(nt)}${rate?` <span class="fn">(${Math.round(rate*1000)/10}% off)</span>`:''}</td><td class="internal"></td></tr>`+fr;
   });
   net=r2(net);
@@ -731,10 +793,32 @@ function summary(){
   L.push('Net total: '+$$(S.net),'Shipping: '+(ship?'Free':'Standard'));
   if(S.SL.length)L.push('','Projected monthly retail sales: '+S.ret,'Projected monthly gross profit: '+S.gp,'Projected steady-state margin: '+S.m2,'First-order margin: '+S.m1,'Projections are estimates, not a guarantee.');
   return L.join('\n')}
-$('share').addEventListener('click',async()=>{
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function buildDoc(){
+  const st=$('store').value.trim(),by=$('buyer').value.trim(),dt=nice($('odate').value)||nice(today());
+  const logo=document.querySelector('header svg.ah').outerHTML;
+  const rows=S.SL.map(x=>`<tr class="dl l-${x.id}"><td>${esc(x.name)}</td><td>${x.c}</td><td>${x.u}</td><td>${$$(x.lst)}</td><td>${$$(x.nt)}${x.rate?` <span class="fn">(${Math.round(x.rate*1000)/10}% off)</span>`:''}</td></tr>`+x.fx.map(y=>`<tr class="df"><td>${esc(y.f)}</td><td>${y.b}</td><td>${y.u}</td><td>${$$(y.lst)}</td><td></td></tr>`).join('')).join('');
+  const pk=P[cur],why=pk?D.filter(l=>pk.why[l.id]&&q[l.id].some(v=>v)).map(l=>`<p><b>${esc(l.name)}.</b> ${esc(pk.why[l.id])}</p>`).join(''):'';
+  $('doc').innerHTML=`<div class="dh"><span class="mark">Little Tree<sup>™</sup></span></div><div class="db">
+  <div class="dt">${logo}<div><h3>Order summary</h3><p class="ds">Little Tree Essentials, New York.</p></div></div>
+  <div class="who"><div>Store<b>${esc(st||'—')}</b></div><div>Buyer<b>${esc(by||'—')}</b></div><div>Date<b>${esc(dt)}</b></div></div>
+  ${S.SL.length?`<table><thead><tr><th>Line / flavor</th><th>Boxes</th><th>Units</th><th>List</th><th>Net</th></tr></thead><tbody>${rows}</tbody></table>`:'<p>No boxes yet.</p>'}
+  <div class="tot"><div><span>List price</span><span>${$$(S.list)}</span></div>${S.dv>0?`<div><span>${disc?'First-order discount':'Volume tier discount'}</span><span>−${$$(S.dv)}</span></div>`:''}<div class="nt"><span>Net total</span><span>${$$(S.net)}</span></div><div><span>Shipping</span><span>${ship?'Free':'Standard'}</span></div></div>
+  ${S.SL.length?`<div class="proj"><div><span>Projected monthly retail sales</span><b>${S.ret}</b></div><div><span>Projected monthly gross profit</span><b>${S.gp}</b></div><div><span>Projected steady-state margin</span><b>${S.m2}</b></div><div><span>First-order margin</span><b>${S.m1}</b></div></div>`:''}
+  ${why?`<div class="dwhy">${why}</div>`:''}
+  <p class="foot">Pricing per the Little Tree Confections NYC price sheet. Projections are estimates based on expected monthly sales per flavor, not a guarantee. Discounts do not stack.</p></div>`}
+let lastFocus=null;
+function openSheet(){paint();buildDoc();lastFocus=document.activeElement;$('sheet').hidden=false;document.body.style.overflow='hidden';$('sprint').focus()}
+function closeSheet(){$('sheet').hidden=true;document.body.style.overflow='';if(lastFocus)lastFocus.focus()}
+$('tshare').addEventListener('click',openSheet);
+$('sclose').addEventListener('click',closeSheet);
+$('sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeSheet()});
+$('sprint').addEventListener('click',()=>{const t=document.title,st=$('store').value.trim();document.title='Little Tree order'+(st?' - '+st:'')+' - '+($('odate').value||today());window.print();setTimeout(()=>document.title=t,1000)});
+$('stext').addEventListener('click',async()=>{
   const t=summary(),title='Little Tree order'+($('store').value.trim()?' · '+$('store').value.trim():'');
   if(navigator.share){try{await navigator.share({title,text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
-  try{await navigator.clipboard.writeText(t);say('Summary copied. Paste it into a text or email.')}catch(e){prompt('Copy this summary:',t)}});
+  try{await navigator.clipboard.writeText(t);say('Summary copied. Paste it into a text or email.');closeSheet()}catch(e){prompt('Copy this summary:',t)}});
 $('odate').value=today();
 build();load(0);listOrders();
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
