@@ -61,6 +61,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans)}
 .doc .tot{margin:14px 0 0 auto;max-width:330px}
 .doc .tot div{display:flex;justify-content:space-between;padding:4px 0;font-size:14px}
 .doc .tot .nt{background:#22372B;color:#f4f7f2;border-radius:6px;padding:8px 12px;margin:6px 0;font-weight:700;font-size:18px}
+.doc .tot .tw{font-weight:700;font-size:16px;border-top:1.5px solid #22372B;padding-top:6px}
 .doc .proj{margin-top:16px;border-top:1px solid #d7ddd5;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
 .doc .proj div{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
 .doc .proj span{font:600 13px var(--round);color:#5a6b60}
@@ -151,6 +152,11 @@ label.ctl{display:flex;align-items:center;gap:6px;font:600 14px var(--round)}
 .stack{display:grid;gap:18px;align-content:start}
 .grid>*,.stack>*{min-width:0}
 .mbar{display:none}
+.tdue strong{font-size:24px}
+.tdue>span:first-child{font-weight:700}
+.lsub s{opacity:.7}
+.lsub b{color:var(--ink)}
+.client .lsub b,.lsub b{font-weight:700}
 .det{display:grid;grid-template-columns:1fr 1fr 150px;gap:10px}
 .det label{display:grid;gap:3px;font:600 13px var(--round);color:var(--mute)}
 .det input,.sav select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:15px var(--sans);color:var(--ink)}
@@ -577,6 +583,7 @@ details.line[open]>summary .chev{transform:rotate(90deg)}
         <select id="preset" class="btn"><option value="0" selected>Blank order</option><option value="1">Balanced</option><option value="2">Fast sellers</option><option value="3">Pre-rolls forward</option></select>
       </label>
       <button class="btn" id="cv" aria-pressed="false">Client view</button>
+      <button class="btn" id="tax" aria-pressed="false">+9% excise tax</button>
     </div>
     <div class="grp">
       <button class="btn on" id="disc" aria-pressed="true">15% first-order discount</button>
@@ -616,6 +623,7 @@ details.line[open]>summary .chev{transform:rotate(90deg)}
       <div class="big"><span>List price</span><strong id="list"></strong></div>
       <div class="big" id="dline"><span id="dlab">Discount</span><strong id="dval"></strong></div>
       <div class="net"><div class="big"><span>Net total</span><strong id="net"></strong></div></div>
+      <div id="tblock" hidden><div class="big"><span>NY wholesale excise tax (9%)</span><strong id="tval"></strong></div><div class="big tdue"><span>Total with tax</span><strong id="tdue"></strong></div></div>
       <div class="big" id="sline"><span>Shipping</span><span id="sval"></span></div>
       <div class="scroll"><table class="ot">
         <thead><tr><th>Line / flavor</th><th>Boxes</th><th>Units</th><th>List</th><th>Net</th><th class="internal">Projected days of supply</th></tr></thead>
@@ -629,7 +637,7 @@ details.line[open]>summary .chev{transform:rotate(90deg)}
       <div class="big"><span>Projected retail sales</span><strong id="ret"></strong></div>
       <div class="big"><span>Projected gross profit</span><strong id="gp"></strong></div>
       <div class="big"><span>Projected steady-state margin</span><strong id="m2"></strong></div>
-      <div class="big"><span>First-order margin</span><strong id="m1"></strong></div>
+      <div class="big" id="m1row"><span>First-order margin</span><strong id="m1"></strong></div>
       <p class="note">Monthly figures count each flavor in the order at full box cost, so they reflect reorders. First-order margin compares the net total with the retail value of the boxes shipped. Projections are estimates, not a guarantee.</p>
     </section>
 
@@ -683,7 +691,7 @@ const P={
   gum:'Sunset Strawberry and Grape.',
   choc:'Milk.'}}
 };
-const q={};let disc=true,ship=false,cur=0,edited=false,S=null;
+const q={};let disc=true,ship=false,tax=false,cur=0,edited=false,S=null;const EXCISE=.09;
 const KA='ltoc.assume.v1',KO='ltoc.orders.v1',AK=['cost','shelf','lo','hi'];
 const DEF=D.map(l=>AK.map(k=>l[k]));
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
@@ -698,16 +706,16 @@ function tier(l,c){let p=0;l.tiers.forEach(([m,d])=>{if(c>=m)p=d});return p}
 function load(k){cur=k;edited=false;D.forEach(l=>{q[l.id]=l.f.map((_,i)=>P[k]?P[k].q[l.id][i]||0:0)});paint()}
 function build(){
   const op=window.innerWidth>820?' open':'';
-  $('lines').innerHTML=D.map(l=>`<details class="line l-${l.id}"${op}><summary class="lh"><b class="nm">${l.name}<span class="cnt z" id="c-${l.id}">0</span></b><span class="chev" aria-hidden="true">›</span></summary><div class="lsub">${l.bx} per box · ${$$(l.cost)}/box</div><div class="fl">${l.f.map((f,i)=>`<div class="f"><span>${f}${l.t?` <small>${l.t[i]}</small>`:''}</span><span class="step"><button aria-label="Remove a box of ${f}" data-l="${l.id}" data-i="${i}" data-d="-1">−</button><b id="q-${l.id}-${i}">0</b><button aria-label="Add a box of ${f}" data-l="${l.id}" data-i="${i}" data-d="1">+</button></span></div>`).join('')}</div></details>`).join('');
+  $('lines').innerHTML=D.map(l=>`<details class="line l-${l.id}"${op}><summary class="lh"><b class="nm">${l.name}<span class="cnt z" id="c-${l.id}">0</span></b><span class="chev" aria-hidden="true">›</span></summary><div class="lsub" id="p-${l.id}">${l.bx} per box · ${$$(l.cost)}/box</div><div class="fl">${l.f.map((f,i)=>`<div class="f"><span>${f}${l.t?` <small>${l.t[i]}</small>`:''}</span><span class="step"><button aria-label="Remove a box of ${f}" data-l="${l.id}" data-i="${i}" data-d="-1">−</button><b id="q-${l.id}-${i}">0</b><button aria-label="Add a box of ${f}" data-l="${l.id}" data-i="${i}" data-d="1">+</button></span></div>`).join('')}</div></details>`).join('');
   $('ass').innerHTML=D.map(l=>`<tr><td>${l.name}</td>${[['cost',1],['shelf',.01],['lo',1],['hi',1]].map(([k,s])=>`<td><input class="in" type="number" min="0" step="${s}" value="${l[k]}" data-l="${l.id}" data-k="${k}" aria-label="${l.name} ${k}"></td>`).join('')}</tr>`).join('');
 }
 function paint(){
   D.forEach(l=>{l.f.forEach((_,i)=>{$(`q-${l.id}-${i}`).textContent=q[l.id][i]});const n=q[l.id].reduce((a,b)=>a+b,0),c=$(`c-${l.id}`);c.textContent=n;c.classList.toggle('z',!n)});
-  let list=0,net=0,rlo=0,rhi=0,glo=0,ghi=0,inv=0,rows='';const SL=[];
+  let list=0,net=0,rlo=0,rhi=0,glo=0,ghi=0,inv=0,rows='';const SL=[],pl={};
   D.forEach(l=>{
     const c=q[l.id].reduce((a,b)=>a+b,0);
     if(!c)return;
-    const t=tier(l,c),rate=disc?Math.max(FIRST,t):t;
+    const t=tier(l,c),rate=disc?Math.max(FIRST,t):t;pl[l.id]=rate;
     const lst=c*l.cost,nt=r2(lst*(1-rate));
     list+=lst;net+=nt;
     const lo=Math.min(l.lo,l.hi),hi=Math.max(l.lo,l.hi),uc=l.cost/l.bx;
@@ -729,20 +737,23 @@ function paint(){
     rows+=`<tr class="lr l-${l.id}"><td>${l.name}</td><td>${c}</td><td>${c*l.bx}</td><td>${$$(lst)}</td><td>${$$(nt)}${rate?` <span class="fn">(${Math.round(rate*1000)/10}% off)</span>`:''}</td><td class="internal"></td></tr>`+fr;
   });
   net=r2(net);
+  D.forEach(l=>{const r=pl[l.id]||0,el=$(`p-${l.id}`);el.innerHTML=r?`${l.bx} per box · <s>${$$(l.cost)}</s> <b>${$$(l.cost*(1-r))}/box</b> (${Math.round(r*1000)/10}% off)`:`${l.bx} per box · ${$$(l.cost)}/box`});
+  const tx=tax?r2(net*EXCISE):0,due=r2(net+tx);
+  $('tblock').hidden=!tax;$('tval').textContent='+'+$$(tx);$('tdue').textContent=$$(due);
   $('list').textContent=$$(list);
   const dv=r2(list-net);
   $('dline').style.display=dv>0?'':'none';
   $('dlab').textContent=disc?'First-order discount':'Volume tier discount';
   $('dval').textContent='−'+$$(dv);
-  $('net').textContent=$$(net);$('mnet').textContent=$$(net);$('mlab').textContent=dv>0?'Net · saves '+$$(dv):'Net total';
+  $('net').textContent=$$(net);$('mnet').textContent=$$(tax?due:net);$('mlab').textContent=tax?'Total with 9% tax':dv>0?'Net · saves '+$$(dv):'Net total';
   $('rows').innerHTML=rows||'<tr><td colspan="6">No boxes yet.</td></tr>';
   $('sval').innerHTML=ship?'<strong>Free</strong>':net>=2500?'<span class="chip c-ok">Over $2,500 free-shipping threshold</span>':'Standard';
   const fm=n=>$$(n);
   $('ret').textContent=rhi?span(rlo,rhi,fm):'–';
   $('gp').textContent=ghi?span(glo,ghi,fm):'–';
   $('m2').textContent=rhi?span(glo/rlo,ghi/rhi,pc):'–';
-  $('m1').textContent=inv?pc((inv-net)/inv):'–';
-  S={SL,list,dv,net,ret:$('ret').textContent,gp:$('gp').textContent,m1:$('m1').textContent,m2:$('m2').textContent};
+  $('m1').textContent=inv?pc((inv-net)/inv):'–';$('m1row').style.display=disc?'':'none';
+  S={SL,list,dv,net,tx,due,ret:$('ret').textContent,gp:$('gp').textContent,m1:$('m1').textContent,m2:$('m2').textContent};
   const pk=P[cur];
   $('whyp').style.display=pk?'':'none';
   if(pk){$('whyh').textContent='About this order: '+pk.name+(edited?' (edited)':'');$('why').innerHTML=D.filter(l=>pk.why[l.id]&&q[l.id].some(x=>x)).map(l=>`<li><b>${l.name}</b>${pk.why[l.id]}</li>`).join('')}
@@ -756,9 +767,10 @@ document.addEventListener('input',e=>{
   if(t.dataset&&t.dataset.k){const l=D.find(x=>x.id===t.dataset.l);l[t.dataset.k]=Math.max(0,parseFloat(t.value)||0);saveAssume();paint()}
 });
 $('preset').addEventListener('change',e=>load(+e.target.value));
-function sync(){$('disc').classList.toggle('on',disc);$('disc').setAttribute('aria-pressed',disc);$('ship').classList.toggle('on',ship);$('ship').setAttribute('aria-pressed',ship);paint()}
+function sync(){$('tax').classList.toggle('on',tax);$('tax').setAttribute('aria-pressed',tax);$('disc').classList.toggle('on',disc);$('disc').setAttribute('aria-pressed',disc);$('ship').classList.toggle('on',ship);$('ship').setAttribute('aria-pressed',ship);paint()}
 $('disc').addEventListener('click',()=>{disc=!disc;if(disc)ship=false;sync()});
 $('ship').addEventListener('click',()=>{ship=!ship;if(ship)disc=false;sync()});
+$('tax').addEventListener('click',()=>{tax=!tax;sync()});
 $('cv').addEventListener('click',e=>{const on=!document.body.classList.contains('client');document.body.classList.toggle('client',on);e.currentTarget.classList.toggle('on',on);e.currentTarget.setAttribute('aria-pressed',on)});
 function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function nice(s){if(!s)return'';const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
@@ -768,13 +780,13 @@ function listOrders(sel){const o=orders();$('saved').innerHTML='<option value=""
 $('save').addEventListener('click',()=>{
   const st=$('store').value.trim();if(!st){say('Add a store name to save this order.');$('store').focus();return}
   const o=orders(),dt=$('odate').value,ex=o.find(x=>x.store.toLowerCase()===st.toLowerCase()&&x.date===dt);
-  const rec={id:ex?ex.id:String(Date.now()),store:st,buyer:$('buyer').value.trim(),date:dt,q:JSON.parse(JSON.stringify(q)),disc,ship,cur,edited,savedAt:Date.now()};
+  const rec={id:ex?ex.id:String(Date.now()),store:st,buyer:$('buyer').value.trim(),date:dt,q:JSON.parse(JSON.stringify(q)),disc,ship,tax,cur,edited,savedAt:Date.now()};
   if(ex)o[o.indexOf(ex)]=rec;else o.unshift(rec);
   say(store.set(KO,o)?(ex?'Updated ':'Saved ')+st+'.':'Could not save on this device.');listOrders(rec.id)});
 $('saved').addEventListener('change',e=>{
   const r=orders().find(x=>x.id===e.target.value);if(!r)return;
   $('store').value=r.store;$('buyer').value=r.buyer||'';$('odate').value=r.date||today();
-  disc=r.disc;ship=r.ship;cur=r.cur||0;$('preset').value=String(P[cur]?cur:0);
+  disc=r.disc;ship=r.ship;tax=!!r.tax;cur=r.cur||0;$('preset').value=String(P[cur]?cur:0);
   D.forEach(l=>{q[l.id]=l.f.map((_,i)=>(r.q[l.id]||[])[i]||0)});edited=!!r.edited;sync();say('Opened '+r.store+'.')});
 $('del').addEventListener('click',()=>{
   const id=$('saved').value;if(!id){say('Pick a saved order to delete.');return}
@@ -790,8 +802,8 @@ function summary(){
   S.SL.forEach(x=>L.push(x.name+', '+x.c+(x.c>1?' boxes':' box')+' ('+x.fl.join(', ')+'): '+$$(x.nt)+(x.rate?' ('+Math.round(x.rate*1000)/10+'% off)':'')));
   L.push('','List price: '+$$(S.list));
   if(S.dv>0)L.push((disc?'First-order discount':'Volume tier discount')+': −'+$$(S.dv));
-  L.push('Net total: '+$$(S.net),'Shipping: '+(ship?'Free':'Standard'));
-  if(S.SL.length)L.push('','Projected monthly retail sales: '+S.ret,'Projected monthly gross profit: '+S.gp,'Projected steady-state margin: '+S.m2,'First-order margin: '+S.m1,'Projections are estimates, not a guarantee.');
+  L.push('Net total: '+$$(S.net));if(tax)L.push('NY wholesale excise tax (9%): +'+$$(S.tx),'Total with tax: '+$$(S.due));L.push('Shipping: '+(ship?'Free':'Standard'));
+  if(S.SL.length)L.push('','Projected monthly retail sales: '+S.ret,'Projected monthly gross profit: '+S.gp,'Projected steady-state margin: '+S.m2,...(disc?['First-order margin: '+S.m1]:[]),'Projections are estimates, not a guarantee.');
   return L.join('\n')}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function buildDoc(){
@@ -803,8 +815,8 @@ function buildDoc(){
   <div class="dt">${logo}<div><h3>Order summary</h3><p class="ds">Little Tree Essentials, New York.</p></div></div>
   <div class="who"><div>Store<b>${esc(st||'—')}</b></div><div>Buyer<b>${esc(by||'—')}</b></div><div>Date<b>${esc(dt)}</b></div></div>
   ${S.SL.length?`<table><thead><tr><th>Line / flavor</th><th>Boxes</th><th>Units</th><th>List</th><th>Net</th></tr></thead><tbody>${rows}</tbody></table>`:'<p>No boxes yet.</p>'}
-  <div class="tot"><div><span>List price</span><span>${$$(S.list)}</span></div>${S.dv>0?`<div><span>${disc?'First-order discount':'Volume tier discount'}</span><span>−${$$(S.dv)}</span></div>`:''}<div class="nt"><span>Net total</span><span>${$$(S.net)}</span></div><div><span>Shipping</span><span>${ship?'Free':'Standard'}</span></div></div>
-  ${S.SL.length?`<div class="proj"><div><span>Projected monthly retail sales</span><b>${S.ret}</b></div><div><span>Projected monthly gross profit</span><b>${S.gp}</b></div><div><span>Projected steady-state margin</span><b>${S.m2}</b></div><div><span>First-order margin</span><b>${S.m1}</b></div></div>`:''}
+  <div class="tot"><div><span>List price</span><span>${$$(S.list)}</span></div>${S.dv>0?`<div><span>${disc?'First-order discount':'Volume tier discount'}</span><span>−${$$(S.dv)}</span></div>`:''}<div class="nt"><span>Net total</span><span>${$$(S.net)}</span></div>${tax?`<div><span>NY wholesale excise tax (9%)</span><span>+${$$(S.tx)}</span></div><div class="tw"><span>Total with tax</span><span>${$$(S.due)}</span></div>`:''}<div><span>Shipping</span><span>${ship?'Free':'Standard'}</span></div></div>
+  ${S.SL.length?`<div class="proj"><div><span>Projected monthly retail sales</span><b>${S.ret}</b></div><div><span>Projected monthly gross profit</span><b>${S.gp}</b></div><div><span>Projected steady-state margin</span><b>${S.m2}</b></div>${disc?`<div><span>First-order margin</span><b>${S.m1}</b></div>`:''}</div>`:''}
   ${why?`<div class="dwhy">${why}</div>`:''}
   <p class="foot">Pricing per the Little Tree Confections NYC price sheet. Projections are estimates based on expected monthly sales per flavor, not a guarantee. Discounts do not stack.</p></div>`}
 let lastFocus=null;
